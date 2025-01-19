@@ -33,6 +33,21 @@ public class Ejemplar {
     @JsonManagedReference
     private Set<org.example.servletbiblioteca.Modelo.Prestamo> prestamos = new LinkedHashSet<>();
 
+    public Ejemplar(Integer id, Libro isbn, String estado) {
+        this.id = id;
+        this.isbn = isbn;
+        this.estado = estado;
+        this.prestamos = new LinkedHashSet<>();
+    }
+
+    public Ejemplar (Libro isbn, String estado) {
+        this.isbn = isbn;
+        this.estado = estado;
+        this.prestamos = new LinkedHashSet<>();
+    }
+
+    public Ejemplar(){}
+
     public Integer getId() {
         return id;
     }
