@@ -13,6 +13,7 @@ import org.example.servletbiblioteca.Modelo.Libro;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "ControladorEjemplar", value = "/ControladorEjemplar")
@@ -99,11 +100,22 @@ public class ControladorEjemplar extends HttpServlet {
                     break;
                 case "listar ejemplares":
                     List<Ejemplar>listaEjemplares = daoEjemplar.selectAll();
+                    List<Ejemplar>listaDispoibles = new ArrayList<Ejemplar>();
 
                     out.println("Lista de ejemplares: \n");
                     for (Ejemplar e: listaEjemplares){
                         out.println(om.writeValueAsString(e));
+
+                        if (e.getEstado().equals("Disponible")){
+                            listaDispoibles.add(e);
+                        }
                     }
+
+                    out.println("Listado de ejemplares con estado 'Disponible: \n'");
+                    for (Ejemplar e: listaDispoibles){
+                        out.println(om.writeValueAsString(e));
+                    }
+
                     break;
                 default:
                     out.println("Error");
@@ -125,8 +137,15 @@ public class ControladorEjemplar extends HttpServlet {
 
         if (libro != null) {
             Ejemplar ejemplar = new Ejemplar(libro, estado);
-            daoEjemplar.insert(ejemplar);
-            return true;
+
+            if (ejemplar.getEstado().equals("Prestado") || ejemplar.getEstado().equals("Disponible") ||
+                    ejemplar.getEstado().equals("Dañado")) {
+                daoEjemplar.insert(ejemplar);
+                return true;
+            }
+            else {
+                return false;
+            }
         }
         else {
             return false;

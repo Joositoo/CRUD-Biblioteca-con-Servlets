@@ -26,6 +26,9 @@ public class ControladorUsuario extends HttpServlet {
         resp.setContentType("application/json");
         PrintWriter out = resp.getWriter();
 
+        String compruebaemail = req.getParameter("compruebaemail");
+        String compruebaPassword = req.getParameter("compruebaPassword");
+
         String opcion = req.getParameter("opcion");
         String dni = req.getParameter("dni");
         String nombre = req.getParameter("nombre");
@@ -36,31 +39,37 @@ public class ControladorUsuario extends HttpServlet {
 
         int id = (idU != null && !idU.isEmpty()) ? Integer.parseInt(idU) : 0;
 
-        switch (opcion){
-            case "crear":
-                creaUsuario(dni, nombre, email, password, tipo);
-                out.println("El usuario con dni '" +dni+ "' y nombre '" +nombre+"' ha sido registrado.");
+        boolean existeUsuario = LoginUsuario.existeUsuario(compruebaemail, compruebaPassword);
+        if (existeUsuario) {
+            switch (opcion){
+                case "crear":
+                    creaUsuario(dni, nombre, email, password, tipo);
+                    out.println("El usuario con dni '" +dni+ "' y nombre '" +nombre+"' ha sido registrado.");
 
-                Usuario usuarioEncontrado = encuentraUsuario(email);
-                out.println(om.writeValueAsString(usuarioEncontrado));
-                break;
-            case "borrar":
-                Usuario usuario = dao.selectById(id);
-                out.println(om.writeValueAsString(usuario));
-                dao.delete(usuario);
-                out.println("El usuario mostrado ha sido borrado.");
-                break;
-            case "actualizar":
-                Usuario user = actualizaUsuario(id, dni, nombre, email, password, tipo);
-                dao.update(user);
-                out.println("Usuario modificado");
+                    Usuario usuarioEncontrado = encuentraUsuario(email);
+                    out.println(om.writeValueAsString(usuarioEncontrado));
+                    break;
+                case "borrar":
+                    Usuario usuario = dao.selectById(id);
+                    out.println(om.writeValueAsString(usuario));
+                    dao.delete(usuario);
+                    out.println("El usuario mostrado ha sido borrado.");
+                    break;
+                case "actualizar":
+                    Usuario user = actualizaUsuario(id, dni, nombre, email, password, tipo);
+                    dao.update(user);
+                    out.println("Usuario modificado");
 
-                Usuario userMod = dao.selectById(id);
-                out.println(om.writeValueAsString(userMod));
-                break;
-            default:
-                out.println("Error");
-                break;
+                    Usuario userMod = dao.selectById(id);
+                    out.println(om.writeValueAsString(userMod));
+                    break;
+                default:
+                    out.println("Error");
+                    break;
+            }
+        }
+        else{
+            out.println("Usuario incorrecto");
         }
     }
 
@@ -70,25 +79,34 @@ public class ControladorUsuario extends HttpServlet {
         resp.setContentType("application/json");
         PrintWriter out = resp.getWriter();
 
+        String email = req.getParameter("email");
+        String password = req.getParameter("password");
+
         String opcion = req.getParameter("opcion");
         int id = Integer.parseInt(req.getParameter("id"));
 
-        switch (opcion){
-            case "ver usuario":
-                Usuario usuario = verUsuario(id);
+        boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
+        if (existeUsuario){
+            switch (opcion){
+                case "ver usuario":
+                    Usuario usuario = verUsuario(id);
 
-                String usuarioJson = om.writeValueAsString(usuario);
-                out.println("Usuario encontrado: \n" + usuarioJson);
-                break;
-            case "listar usuarios":
-                List<Usuario> listaUsuarios = verTodos();
-                for (Usuario u : listaUsuarios) {
-                    out.println(om.writeValueAsString(u));
-                }
-                break;
-            default:
-                out.println("Error");
-                break;
+                    String usuarioJson = om.writeValueAsString(usuario);
+                    out.println("Usuario encontrado: \n" + usuarioJson);
+                    break;
+                case "listar usuarios":
+                    List<Usuario> listaUsuarios = verTodos();
+                    for (Usuario u : listaUsuarios) {
+                        out.println(om.writeValueAsString(u));
+                    }
+                    break;
+                default:
+                    out.println("Error");
+                    break;
+            }
+        }
+        else{
+            out.println("Usuario incorrecto");
         }
     }
 

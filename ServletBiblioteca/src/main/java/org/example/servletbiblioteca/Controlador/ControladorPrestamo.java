@@ -37,7 +37,7 @@ public class ControladorPrestamo extends HttpServlet {
         String idUsuario = request.getParameter("idUsuario");
         String idEjemplar = request.getParameter("idEjemplar");
         LocalDate fechaInicio = LocalDate.now();
-        LocalDate fechaDevol =LocalDate.now().plusDays(10);
+        LocalDate fechaDevol =LocalDate.now().plusDays(15);
 
         int id = (idP != null && !idP.isEmpty()) ? Integer.parseInt(idP) : 0;
 
