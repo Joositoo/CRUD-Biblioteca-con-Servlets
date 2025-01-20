@@ -52,11 +52,14 @@ public class ControladorEjemplar extends HttpServlet {
                     }
                     break;
                 case "modificar ejemplar":
-                    actualizaEjemplar(id, isbn, estado);
-
-                    out.println("El ejemplar con id '"  +id+"' ha sido modificado");
-                    out.println(om.writeValueAsString(daoEjemplar.selectById(id)));
-                    break;
+                    if (actualizaEjemplar(id, isbn, estado)){
+                        out.println("El ejemplar con id '"  +id+"' ha sido modificado");
+                        out.println(om.writeValueAsString(daoEjemplar.selectById(id)));
+                        break;
+                    }
+                    else{
+                        out.println("No se ha podido modificar el ejemplar");
+                    }
                 case "eliminar ejemplar":
                     Ejemplar ejemplar = daoEjemplar.selectById(id);
                     out.println(om.writeValueAsString(ejemplar));
@@ -168,7 +171,7 @@ public class ControladorEjemplar extends HttpServlet {
         return daoEjemplar.selectById(id);
     }
 
-    public void actualizaEjemplar(int id, String isbn, String estado) {
+    public boolean actualizaEjemplar(int id, String isbn, String estado) {
         Libro libro = null;
         List<Libro> listaLibros = daoLibro.selectAll();
         for (Libro l : listaLibros) {
@@ -177,9 +180,15 @@ public class ControladorEjemplar extends HttpServlet {
             }
         }
 
-        Ejemplar ejemplar = daoEjemplar.selectById(id);
-        ejemplar.setIsbn(libro);
-        ejemplar.setEstado(estado);
-        daoEjemplar.update(ejemplar);
+        if (libro != null) {
+            Ejemplar ejemplar = daoEjemplar.selectById(id);
+            ejemplar.setIsbn(libro);
+            ejemplar.setEstado(estado);
+            daoEjemplar.update(ejemplar);
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }
