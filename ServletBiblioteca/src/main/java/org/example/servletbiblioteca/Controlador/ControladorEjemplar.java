@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @WebServlet(name = "ControladorEjemplar", value = "/ControladorEjemplar")
 public class ControladorEjemplar extends HttpServlet {
@@ -50,7 +51,7 @@ public class ControladorEjemplar extends HttpServlet {
                         out.println("El ejemplar con isbn '" +isbn+ "' y estado '" +estado+ "' se ha registrado.");
                     }
                     else {
-                        out.println("No se ha podido registrar el ejemplar");
+                        out.println("No se ha podido registrar el ejemplar (estado incorrecto o isbn no se encuentra)");
                     }
                     break;
                 case "modificar ejemplar":
@@ -60,8 +61,9 @@ public class ControladorEjemplar extends HttpServlet {
                         break;
                     }
                     else{
-                        out.println("No se ha podido modificar el ejemplar");
+                        out.println("No se ha podido modificar el ejemplar (isbn o estado incorrectos).");
                     }
+                    break;
                 case "eliminar ejemplar":
                     Ejemplar ejemplar = daoEjemplar.selectById(id);
                     out.println(om.writeValueAsString(ejemplar));
@@ -184,10 +186,17 @@ public class ControladorEjemplar extends HttpServlet {
 
         if (libro != null) {
             Ejemplar ejemplar = daoEjemplar.selectById(id);
-            ejemplar.setIsbn(libro);
-            ejemplar.setEstado(estado);
-            daoEjemplar.update(ejemplar);
-            return true;
+
+            if (Objects.equals(estado, "Prestado") || Objects.equals(estado, "Disponible") ||
+                    Objects.equals(estado, "Dañado")){
+                ejemplar.setIsbn(libro);
+                ejemplar.setEstado(estado);
+                daoEjemplar.update(ejemplar);
+                return true;
+            }
+            else{
+                return false;
+            }
         }
         else{
             return false;

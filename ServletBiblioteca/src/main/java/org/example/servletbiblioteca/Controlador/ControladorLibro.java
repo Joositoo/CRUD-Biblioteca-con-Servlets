@@ -53,8 +53,13 @@ public class ControladorLibro extends HttpServlet {
                 case "eliminar libro":
                     Libro libroEliminado = eliminaLibro(isbn);
 
-                    out.println(om.writeValueAsString(libroEliminado));
-                    out.println("El libro mostrado ha sido eliminado.");
+                    if (libroEliminado != null){
+                        out.println(om.writeValueAsString(libroEliminado));
+                        out.println("El libro mostrado ha sido eliminado.");
+                    }
+                    else{
+                        out.println("El libro no existe");
+                    }
                     break;
                 default:
                     out.println("Error");

@@ -26,7 +26,7 @@ public class ControladorUsuario extends HttpServlet {
         resp.setContentType("application/json");
         PrintWriter out = resp.getWriter();
 
-        String compruebaemail = req.getParameter("compruebaemail");
+        String compruebaemail = req.getParameter("compruebaEmail");
         String compruebaPassword = req.getParameter("compruebaPassword");
 
         String opcion = req.getParameter("opcion");
@@ -43,11 +43,15 @@ public class ControladorUsuario extends HttpServlet {
         if (existeUsuario) {
             switch (opcion){
                 case "crear":
-                    creaUsuario(dni, nombre, email, password, tipo);
-                    out.println("El usuario con dni '" +dni+ "' y nombre '" +nombre+"' ha sido registrado.");
+                    if (creaUsuario(dni, nombre, email, password, tipo)){
+                        out.println("El usuario con dni '" +dni+ "' y nombre '" +nombre+"' ha sido registrado.");
 
-                    Usuario usuarioEncontrado = encuentraUsuario(email);
-                    out.println(om.writeValueAsString(usuarioEncontrado));
+                        Usuario usuarioEncontrado = encuentraUsuario(email);
+                        out.println(om.writeValueAsString(usuarioEncontrado));
+                    }
+                    else{
+                        out.println("No se reconoce 'tipo' de usuario");
+                    }
                     break;
                 case "borrar":
                     Usuario usuario = dao.selectById(id);
@@ -79,13 +83,13 @@ public class ControladorUsuario extends HttpServlet {
         resp.setContentType("application/json");
         PrintWriter out = resp.getWriter();
 
-        String email = req.getParameter("email");
-        String password = req.getParameter("password");
+        String compruebaEmail = req.getParameter("compruebaEmail");
+        String compruebaPassword = req.getParameter("compruebaPassword");
 
         String opcion = req.getParameter("opcion");
         int id = Integer.parseInt(req.getParameter("id"));
 
-        boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
+        boolean existeUsuario = LoginUsuario.existeUsuario(compruebaEmail, compruebaPassword);
         if (existeUsuario){
             switch (opcion){
                 case "ver usuario":
@@ -110,9 +114,15 @@ public class ControladorUsuario extends HttpServlet {
         }
     }
 
-    public void creaUsuario(String dni, String nombre, String email, String password, String tipo) throws JsonProcessingException {
-        Usuario usuario = new Usuario(dni, nombre, email, password, tipo);
-        dao.insert(usuario);
+    public boolean creaUsuario(String dni, String nombre, String email, String password, String tipo) throws JsonProcessingException {
+        if (Objects.equals(tipo, "normal") || Objects.equals(tipo, "administrador")){
+            Usuario usuario = new Usuario(dni, nombre, email, password, tipo);
+            dao.insert(usuario);
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     public Usuario encuentraUsuario(String email){

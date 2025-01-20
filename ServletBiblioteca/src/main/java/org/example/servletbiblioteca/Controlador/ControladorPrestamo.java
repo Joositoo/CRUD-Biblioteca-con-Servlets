@@ -49,12 +49,19 @@ public class ControladorPrestamo extends HttpServlet {
         if (existeUsuario) {
             switch (opcion){
                 case "crear prestamo":
-                    Prestamo prestamoCreado = creaPrestamo((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)), fechaInicio, fechaDevol);
-                    daoPrestamo.insert(prestamoCreado);
-                    prestamoCreado = buscaPrestamoCreado((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)));
+                    if (puedeCrearPrestamo(Integer.parseInt(idUsuario), Integer.parseInt(idEjemplar))){
+                        Prestamo prestamoCreado = creaPrestamo((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)), fechaInicio, fechaDevol);
+                        daoPrestamo.insert(prestamoCreado);
+                        prestamoCreado = buscaPrestamoCreado((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)));
 
-                    out.println("Préstamo registrado.");
-                    out.println(om.writeValueAsString(prestamoCreado));
+                        out.println("Préstamo registrado.");
+                        out.println(om.writeValueAsString(prestamoCreado));
+                    }
+                    else{
+                        out.println("No se ha podido crear el préstamo (supera el nº de préstamos, tiene penaliz" +
+                                " o el libro ya está prestado).");
+                    }
+
                     break;
                 case "actualizar prestamo":
                     Prestamo prestamo = actualizaPrestamo(id, Integer.parseInt(idUsuario), Integer.parseInt(idEjemplar));
@@ -120,7 +127,34 @@ public class ControladorPrestamo extends HttpServlet {
         Usuario usuario = daoUsuario.selectById(idUsuario);
         Ejemplar ejemplar = daoEjemplar.selectById(idEjemplar);
 
-        return new Prestamo(usuario, ejemplar, fechaInicio, fechaDevol);
+        Prestamo prestamo = new Prestamo(usuario, ejemplar, fechaInicio, fechaDevol);
+        usuario.getPrestamos().add(prestamo);
+        daoUsuario.update(usuario);
+
+        return prestamo;
+    }
+
+    public boolean puedeCrearPrestamo(int idUsuario, int idEjemplar){
+        Usuario usuario = daoUsuario.selectById(idUsuario);
+        Ejemplar ejemplar = daoEjemplar.selectById(idEjemplar);
+
+        if (usuario.getPenalizacionHasta() != null && usuario.getPenalizacionHasta().isAfter(LocalDate.now())){
+            return false;
+        }
+        if (!ejemplar.getEstado().equals("Prestado")){
+            ejemplar.setEstado("Prestado");
+            daoEjemplar.update(ejemplar);
+
+            if (usuario.getPrestamos().size() < 3){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
     }
 
     public Prestamo buscaPrestamoCreado(int idUsuario, int idEjemplar){
@@ -146,7 +180,7 @@ public class ControladorPrestamo extends HttpServlet {
         prestamo.setUsuario(usuario);
         prestamo.setEjemplar(ejemplar);
         prestamo.setFechaInicio(LocalDate.now());
-        prestamo.setFechaDevolucion(LocalDate.now().plusDays(7));
+        prestamo.setFechaDevolucion(LocalDate.now().plusDays(15));
 
         daoPrestamo.update(prestamo);
 
