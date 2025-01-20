@@ -31,11 +31,15 @@ public class ControladorEjemplar extends HttpServlet {
         String password = request.getParameter("password");
 
         String opcion = request.getParameter("opcion");
-        String idE = request.getParameter("id");
+
+        Integer id = null;
+        String idParam = request.getParameter("id");
+        if(idParam != null && !idParam.isEmpty()){
+            id = Integer.valueOf(idParam);
+        }
+
         String isbn = request.getParameter("isbn");
         String estado = request.getParameter("estado");
-
-        int id = (idE != null && !idE.isEmpty()) ? Integer.parseInt(idE) : 0;
 
         boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
         if (existeUsuario) {
@@ -44,8 +48,6 @@ public class ControladorEjemplar extends HttpServlet {
                     boolean ejCreado = creaEjemplar(isbn, estado);
                     if (ejCreado){
                         out.println("El ejemplar con isbn '" +isbn+ "' y estado '" +estado+ "' se ha registrado.");
-                        Ejemplar ejemplarCreado = buscaEjemplar(isbn);
-                        out.println(om.writeValueAsString(ejemplarCreado));
                     }
                     else {
                         out.println("No se ha podido registrar el ejemplar");

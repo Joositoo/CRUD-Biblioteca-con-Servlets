@@ -33,13 +33,17 @@ public class ControladorPrestamo extends HttpServlet {
         String password = request.getParameter("password");
 
         String opcion = request.getParameter("opcion");
-        String idP = request.getParameter("id");
+
+        Integer id = null;
+        String idParam = request.getParameter("id");
+        if(idParam != null && !idParam.isEmpty()){
+            id = Integer.valueOf(idParam);
+        }
+
         String idUsuario = request.getParameter("idUsuario");
         String idEjemplar = request.getParameter("idEjemplar");
         LocalDate fechaInicio = LocalDate.now();
         LocalDate fechaDevol =LocalDate.now().plusDays(15);
-
-        int id = (idP != null && !idP.isEmpty()) ? Integer.parseInt(idP) : 0;
 
         boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
         if (existeUsuario) {
