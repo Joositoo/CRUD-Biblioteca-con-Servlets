@@ -46,8 +46,9 @@ public class ControladorUsuario extends HttpServlet {
                 break;
             case "borrar":
                 Usuario usuario = dao.selectById(id);
+                out.println(om.writeValueAsString(usuario));
                 dao.delete(usuario);
-                out.println("El usuario con dni '" +usuario.getDni()+ "' y nombre '" +usuario.getNombre()+"' ha sido borrado.");
+                out.println("El usuario mostrado ha sido borrado.");
                 break;
             case "actualizar":
                 Usuario user = actualizaUsuario(id, dni, nombre, email, password, tipo);

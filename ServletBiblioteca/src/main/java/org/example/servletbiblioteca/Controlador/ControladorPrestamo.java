@@ -31,8 +31,8 @@ public class ControladorPrestamo extends HttpServlet {
 
         String opcion = request.getParameter("opcion");
         String idP = request.getParameter("id");
-        int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
-        int idEjemplar = Integer.parseInt(request.getParameter("idEjemplar"));
+        String idUsuario = request.getParameter("idUsuario");
+        String idEjemplar = request.getParameter("idEjemplar");
         LocalDate fechaInicio = LocalDate.now();
         LocalDate fechaDevol =LocalDate.now().plusDays(10);
 
@@ -40,16 +40,24 @@ public class ControladorPrestamo extends HttpServlet {
 
         switch (opcion){
             case "crear prestamo":
-                Prestamo prestamoCreado = creaPrestamo(idUsuario, idEjemplar, fechaInicio, fechaDevol);
+                Prestamo prestamoCreado = creaPrestamo((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)), fechaInicio, fechaDevol);
                 daoPrestamo.insert(prestamoCreado);
-                prestamoCreado = buscaPrestamoCreado(idUsuario, idEjemplar);
+                prestamoCreado = buscaPrestamoCreado((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)));
 
                 out.println("Préstamo registrado.");
                 out.println(om.writeValueAsString(prestamoCreado));
                 break;
             case "actualizar prestamo":
+                Prestamo prestamo = actualizaPrestamo(id, Integer.parseInt(idUsuario), Integer.parseInt(idEjemplar));
+
+                out.println("El préstamo ha sido modificado.\n " + om.writeValueAsString(prestamo));
                 break;
             case "eliminar prestamo":
+                Prestamo prestamoAEliminar = daoPrestamo.selectById(id);
+                out.println(om.writeValueAsString(prestamoAEliminar));
+                daoPrestamo.delete(prestamoAEliminar);
+
+                out.println("El prestamo mostrado ha sido eliminado.");
                 break;
             default:
                 out.println("Error");
@@ -105,5 +113,21 @@ public class ControladorPrestamo extends HttpServlet {
             }
         }
         return prestamo;
+    }
+
+    public Prestamo actualizaPrestamo(int id, int idUsuario, int idEjemplar){
+        Prestamo prestamo = daoPrestamo.selectById(id);
+
+        Usuario usuario = daoUsuario.selectById(idUsuario);
+        Ejemplar ejemplar = daoEjemplar.selectById(idEjemplar);
+
+        prestamo.setUsuario(usuario);
+        prestamo.setEjemplar(ejemplar);
+        prestamo.setFechaInicio(LocalDate.now());
+        prestamo.setFechaDevolucion(LocalDate.now().plusDays(7));
+
+        daoPrestamo.update(prestamo);
+
+        return daoPrestamo.selectById(prestamo.getId());
     }
 }

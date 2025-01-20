@@ -53,10 +53,10 @@ public class ControladorEjemplar extends HttpServlet {
                 break;
             case "eliminar ejemplar":
                 Ejemplar ejemplar = daoEjemplar.selectById(id);
+                out.println(om.writeValueAsString(ejemplar));
                 daoEjemplar.delete(ejemplar);
 
-                out.println("El ejemplar con id '" +ejemplar.getId()+"', isbn '" +ejemplar.getIsbn()+"' y estado " +
-                        "'" +ejemplar.getEstado()+ "' ha sido eliminado.");
+                out.println("El ejemplar mostrado ha sido eliminado.");
                 break;
             default:
                 out.println("Error");
