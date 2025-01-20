@@ -26,6 +26,9 @@ public class ControladorEjemplar extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
 
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
         String opcion = request.getParameter("opcion");
         String idE = request.getParameter("id");
         String isbn = request.getParameter("isbn");
@@ -33,35 +36,42 @@ public class ControladorEjemplar extends HttpServlet {
 
         int id = (idE != null && !idE.isEmpty()) ? Integer.parseInt(idE) : 0;
 
-        switch (opcion) {
-            case "crear ejemplar":
-                boolean ejCreado = creaEjemplar(isbn, estado);
-                if (ejCreado){
-                    out.println("El ejemplar con isbn '" +isbn+ "' y estado '" +estado+ "' se ha registrado.");
-                    Ejemplar ejemplarCreado = buscaEjemplar(isbn);
-                    out.println(om.writeValueAsString(ejemplarCreado));
-                }
-                else {
-                    out.println("No se ha podido registrar el ejemplar");
-                }
-                break;
-            case "modificar ejemplar":
-                actualizaEjemplar(id, isbn, estado);
+        boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
+        if (existeUsuario) {
+            switch (opcion) {
+                case "crear ejemplar":
+                    boolean ejCreado = creaEjemplar(isbn, estado);
+                    if (ejCreado){
+                        out.println("El ejemplar con isbn '" +isbn+ "' y estado '" +estado+ "' se ha registrado.");
+                        Ejemplar ejemplarCreado = buscaEjemplar(isbn);
+                        out.println(om.writeValueAsString(ejemplarCreado));
+                    }
+                    else {
+                        out.println("No se ha podido registrar el ejemplar");
+                    }
+                    break;
+                case "modificar ejemplar":
+                    actualizaEjemplar(id, isbn, estado);
 
-                out.println("El ejemplar con id '"  +id+"' ha sido modificado");
-                out.println(om.writeValueAsString(daoEjemplar.selectById(id)));
-                break;
-            case "eliminar ejemplar":
-                Ejemplar ejemplar = daoEjemplar.selectById(id);
-                out.println(om.writeValueAsString(ejemplar));
-                daoEjemplar.delete(ejemplar);
+                    out.println("El ejemplar con id '"  +id+"' ha sido modificado");
+                    out.println(om.writeValueAsString(daoEjemplar.selectById(id)));
+                    break;
+                case "eliminar ejemplar":
+                    Ejemplar ejemplar = daoEjemplar.selectById(id);
+                    out.println(om.writeValueAsString(ejemplar));
+                    daoEjemplar.delete(ejemplar);
 
-                out.println("El ejemplar mostrado ha sido eliminado.");
-                break;
-            default:
-                out.println("Error");
-                break;
+                    out.println("El ejemplar mostrado ha sido eliminado.");
+                    break;
+                default:
+                    out.println("Error");
+                    break;
+            }
         }
+        else{
+            out.println("Usuario incorrecto");
+        }
+
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -70,28 +80,37 @@ public class ControladorEjemplar extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
 
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
         String opcion = request.getParameter("opcion");
         String idE = request.getParameter("id");
 
         int id = (idE != null && !idE.isEmpty()) ? Integer.parseInt(idE) : 0;
 
-        switch (opcion) {
-            case "ver ejemplar":
-                Ejemplar ejemplar = leeEjemplar(id);
+        boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
+        if (existeUsuario) {
+            switch (opcion) {
+                case "ver ejemplar":
+                    Ejemplar ejemplar = leeEjemplar(id);
 
-                out.println("Ejemplar encontrado:");
-                out.println(om.writeValueAsString(ejemplar));
-                break;
-            case "listar ejemplares":
-                List<Ejemplar>listaEjemplares = daoEjemplar.selectAll();
+                    out.println("Ejemplar encontrado:");
+                    out.println(om.writeValueAsString(ejemplar));
+                    break;
+                case "listar ejemplares":
+                    List<Ejemplar>listaEjemplares = daoEjemplar.selectAll();
 
-                out.println("Lista de ejemplares: \n");
-                for (Ejemplar e: listaEjemplares){
-                    out.println(om.writeValueAsString(e));
-                }
-                break;
-            default:
-                out.println("Error");
+                    out.println("Lista de ejemplares: \n");
+                    for (Ejemplar e: listaEjemplares){
+                        out.println(om.writeValueAsString(e));
+                    }
+                    break;
+                default:
+                    out.println("Error");
+            }
+        }
+        else{
+            out.println("Usuario incorrecto");
         }
     }
 

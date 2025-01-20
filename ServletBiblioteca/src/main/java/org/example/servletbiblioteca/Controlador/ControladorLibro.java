@@ -25,35 +25,44 @@ public class ControladorLibro extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
 
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
         String opcion = request.getParameter("opcion");
         String isbn = request.getParameter("isbn");
         String titulo = request.getParameter("titulo");
         String autor = request.getParameter("autor");
 
-        switch (opcion) {
-            case "crear libro":
-                Libro libroCreado = creaLibro(isbn, titulo, autor);
+        boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
+        if (existeUsuario) {
+            switch (opcion) {
+                case "crear libro":
+                    Libro libroCreado = creaLibro(isbn, titulo, autor);
 
-                Libro encuentraLibroCreado = buscaLibro(libroCreado.getIsbn());
-                out.println("Libro registrado. \n" +om.writeValueAsString(encuentraLibroCreado));
-                break;
-            case "actualizar libro":
-                Libro libroActualizado = actualizaLibro(isbn, titulo, autor);
+                    Libro encuentraLibroCreado = buscaLibro(libroCreado.getIsbn());
+                    out.println("Libro registrado. \n" +om.writeValueAsString(encuentraLibroCreado));
+                    break;
+                case "actualizar libro":
+                    Libro libroActualizado = actualizaLibro(isbn, titulo, autor);
 
-                dao.update(libroActualizado);
+                    dao.update(libroActualizado);
 
-                libroActualizado = buscaLibro(libroActualizado.getIsbn());
-                out.println("Libro actualizado. \n" +om.writeValueAsString(libroActualizado));
-                break;
-            case "eliminar libro":
-                Libro libroEliminado = eliminaLibro(isbn);
+                    libroActualizado = buscaLibro(libroActualizado.getIsbn());
+                    out.println("Libro actualizado. \n" +om.writeValueAsString(libroActualizado));
+                    break;
+                case "eliminar libro":
+                    Libro libroEliminado = eliminaLibro(isbn);
 
-                out.println(om.writeValueAsString(libroEliminado));
-                out.println("El libro mostrado ha sido eliminado.");
-                break;
-            default:
-                out.println("Error");
-                break;
+                    out.println(om.writeValueAsString(libroEliminado));
+                    out.println("El libro mostrado ha sido eliminado.");
+                    break;
+                default:
+                    out.println("Error");
+                    break;
+            }
+        }
+        else {
+            out.println("Usuario incorrecto");
         }
     }
 
@@ -63,26 +72,36 @@ public class ControladorLibro extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
 
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
         String opcion = request.getParameter("opcion");
         String isbn = request.getParameter("isbn");
 
-        switch (opcion){
-            case "ver libro":
-                Libro libroEncontrado = buscaLibro(isbn);
+        boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
+        if (existeUsuario) {
+            switch (opcion){
+                case "ver libro":
+                    Libro libroEncontrado = buscaLibro(isbn);
 
-                out.println("Libro encontrado: \n" +om.writeValueAsString(libroEncontrado));
-                break;
-            case "listar libros":
-                out.println("Listado de libros: ");
+                    out.println("Libro encontrado: \n" +om.writeValueAsString(libroEncontrado));
+                    break;
+                case "listar libros":
+                    out.println("Listado de libros: ");
 
-                List<Libro> listaLibros = dao.selectAll();
-                for (Libro libro : listaLibros) {
-                    out.println(om.writeValueAsString(libro));
-                }
-                break;
-            default:
-                out.println("error");
+                    List<Libro> listaLibros = dao.selectAll();
+                    for (Libro libro : listaLibros) {
+                        out.println(om.writeValueAsString(libro));
+                    }
+                    break;
+                default:
+                    out.println("error");
+            }
         }
+        else {
+            out.println("Usuario incorrecto");
+        }
+
 
     }
 

@@ -29,6 +29,9 @@ public class ControladorPrestamo extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
 
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
         String opcion = request.getParameter("opcion");
         String idP = request.getParameter("id");
         String idUsuario = request.getParameter("idUsuario");
@@ -38,30 +41,36 @@ public class ControladorPrestamo extends HttpServlet {
 
         int id = (idP != null && !idP.isEmpty()) ? Integer.parseInt(idP) : 0;
 
-        switch (opcion){
-            case "crear prestamo":
-                Prestamo prestamoCreado = creaPrestamo((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)), fechaInicio, fechaDevol);
-                daoPrestamo.insert(prestamoCreado);
-                prestamoCreado = buscaPrestamoCreado((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)));
+        boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
+        if (existeUsuario) {
+            switch (opcion){
+                case "crear prestamo":
+                    Prestamo prestamoCreado = creaPrestamo((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)), fechaInicio, fechaDevol);
+                    daoPrestamo.insert(prestamoCreado);
+                    prestamoCreado = buscaPrestamoCreado((Integer.parseInt(idUsuario)), (Integer.parseInt(idEjemplar)));
 
-                out.println("Préstamo registrado.");
-                out.println(om.writeValueAsString(prestamoCreado));
-                break;
-            case "actualizar prestamo":
-                Prestamo prestamo = actualizaPrestamo(id, Integer.parseInt(idUsuario), Integer.parseInt(idEjemplar));
+                    out.println("Préstamo registrado.");
+                    out.println(om.writeValueAsString(prestamoCreado));
+                    break;
+                case "actualizar prestamo":
+                    Prestamo prestamo = actualizaPrestamo(id, Integer.parseInt(idUsuario), Integer.parseInt(idEjemplar));
 
-                out.println("El préstamo ha sido modificado.\n " + om.writeValueAsString(prestamo));
-                break;
-            case "eliminar prestamo":
-                Prestamo prestamoAEliminar = daoPrestamo.selectById(id);
-                out.println(om.writeValueAsString(prestamoAEliminar));
-                daoPrestamo.delete(prestamoAEliminar);
+                    out.println("El préstamo ha sido modificado.\n " + om.writeValueAsString(prestamo));
+                    break;
+                case "eliminar prestamo":
+                    Prestamo prestamoAEliminar = daoPrestamo.selectById(id);
+                    out.println(om.writeValueAsString(prestamoAEliminar));
+                    daoPrestamo.delete(prestamoAEliminar);
 
-                out.println("El prestamo mostrado ha sido eliminado.");
-                break;
-            default:
-                out.println("Error");
-                break;
+                    out.println("El prestamo mostrado ha sido eliminado.");
+                    break;
+                default:
+                    out.println("Error");
+                    break;
+            }
+        }
+        else {
+            out.println("Usuario incorrecto");
         }
     }
 
@@ -71,26 +80,35 @@ public class ControladorPrestamo extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
 
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
         String opcion = request.getParameter("opcion");
         String idP = request.getParameter("id");
 
         int id = (idP != null && !idP.isEmpty()) ? Integer.parseInt(idP) : 0;
 
-        switch (opcion) {
-            case "ver prestamo":
-                Prestamo prestamo = daoPrestamo.selectById(id);
-                out.println("Prestamo encontrado: \n" + om.writeValueAsString(prestamo));
-                break;
-            case "listar prestamos":
-                List<Prestamo> prestamos = daoPrestamo.selectAll();
+        boolean existeUsuario = LoginUsuario.existeUsuario(email, password);
+        if (existeUsuario) {
+            switch (opcion) {
+                case "ver prestamo":
+                    Prestamo prestamo = daoPrestamo.selectById(id);
+                    out.println("Prestamo encontrado: \n" + om.writeValueAsString(prestamo));
+                    break;
+                case "listar prestamos":
+                    List<Prestamo> prestamos = daoPrestamo.selectAll();
 
-                out.println("Listado de préstamos: ");
-                for (Prestamo p : prestamos) {
-                    out.println(om.writeValueAsString(p));
-                }
-                break;
-            default:
-                out.println("Error");
+                    out.println("Listado de préstamos: ");
+                    for (Prestamo p : prestamos) {
+                        out.println(om.writeValueAsString(p));
+                    }
+                    break;
+                default:
+                    out.println("Error");
+            }
+        }
+        else {
+            out.println("Usuario incorrecto");
         }
     }
 
